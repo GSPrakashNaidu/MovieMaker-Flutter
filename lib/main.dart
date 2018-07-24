@@ -1,8 +1,10 @@
 import 'dart:async';
 import 'dart:io';
 
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
-import 'package:image_picker/image_picker.dart';
+import 'package:medias_picker/medias_picker.dart';
+import 'package:flutter/services.dart';
 import 'package:video_player/video_player.dart';
 
 void main() => runApp(new MyApp());
@@ -27,47 +29,70 @@ class MyHomePage extends StatefulWidget {
 }
 
 class _MyHomePageState extends State<MyHomePage> {
-  File _video;
-  VideoPlayerController _controller;
+  Future<List> videosPath;
 
-  Future getImage() async {
-    var video = await ImagePicker.pickVideo(source: ImageSource.gallery);
-    setState(() {
-      _video = video;
-    });
+  Future<List> pickVideos() async {
+    List<dynamic> paths;
+    try {
+      if (Platform.isAndroid) {
+        if (!await MediasPicker.checkPermission()) {
+          if (!await MediasPicker.requestPermission()) {
+            return List();
+          }
+        }
+      }
+      paths = await MediasPicker.pickVideos(quantity: 10);
+      debugPrint("Bipin - selected videos paths: $paths");
+    } on PlatformException {
+      debugPrint("Bipin - PlatformExcetion while picking videos");
+    }
+
+    if (!mounted) return List();
+
+    return paths;
   }
 
   @override
   void initState() {
     super.initState();
-    _controller = VideoPlayerController
-        .file(File('/storage/emulated/0/DCIM/Camera/VID_20180719_030046.mp4'))
-//        .network(
-//            'http://www.sample-videos.com/video/mp4/720/big_buck_bunny_720p_20mb.mp4')
-          ..addListener(() {
-            //_controller.play();
-            print("add Listener");
-          })
-          ..initialize().then((_) {
-            // Ensure the first frame is shown after the video is initialized, even before the play button has been pressed.
-            setState(() {
-              print("set state");
-            });
-          });
-
   }
 
   @override
   Widget build(BuildContext context) {
+    var futureBuilder = new FutureBuilder(
+      future: videosPath,
+      builder: (BuildContext context, AsyncSnapshot snapshot) {
+        switch (snapshot.connectionState) {
+          case ConnectionState.none:
+            return Center(
+              child: Text("No media added yet, Please add few using + sign"),
+            );
+          case ConnectionState.waiting:
+            return Center(
+              child: Text("loading..."),
+            );
+          default:
+            if (snapshot.hasError)
+              return Center(
+                child: Text("Error: ${snapshot.error}"),
+              );
+            else
+              return getVideoImageList(context, snapshot);
+        }
+      },
+    );
+
     Widget child = new Scaffold(
       appBar: new AppBar(
         title: new Text('Movie Maker'),
       ),
-      body: new Center(
-        child: getVideoImage(),
-      ),
+      body: futureBuilder,
       floatingActionButton: new FloatingActionButton(
-        onPressed: getImage,
+        onPressed: () {
+          debugPrint("Bipin - FAB pressed");
+          videosPath = pickVideos();
+          debugPrint("Bipin - videosPath: $videosPath");
+        },
         tooltip: 'Pick a Video',
         child: new Icon(Icons.add),
       ),
@@ -76,17 +101,23 @@ class _MyHomePageState extends State<MyHomePage> {
     return child;
   }
 
-  Widget getVideoImage() {
-//    if (_video == null) {
-//      return new Text('Please select a video by clicking + button');
-//    } else {
-    print(" isInit:" + _controller.value.initialized.toString());
-    return _controller.value.initialized
-        ? AspectRatio(
-            aspectRatio: _controller.value.aspectRatio,
-            child: VideoPlayer(_controller),
-          )
-        : Container();
-//    }
+  Widget getVideoImageList(BuildContext context, AsyncSnapshot snapshot) {
+    List<dynamic> values = snapshot.data;
+    debugPrint("Bipin - values: $values");
+    return new ListView.builder(
+      itemCount: values.length,
+      itemBuilder: (BuildContext context, int index) {
+        return new Column(
+          children: <Widget>[
+            new ListTile(
+              title: new Text(values[index].toString()),
+            ),
+            new Divider(
+              height: 2.0,
+            ),
+          ],
+        );
+      },
+    );
   }
 }
