@@ -69,7 +69,7 @@ class _MyHomePageState extends State<MyHomePage> {
             );
           case ConnectionState.waiting:
             return Center(
-              child: Text("loading..."),
+              child: Text("Loading..."),
             );
           default:
             if (snapshot.hasError)
@@ -104,20 +104,26 @@ class _MyHomePageState extends State<MyHomePage> {
   Widget getVideoImageList(BuildContext context, AsyncSnapshot snapshot) {
     List<dynamic> values = snapshot.data;
     debugPrint("Bipin - values: $values");
-    return new ListView.builder(
-      itemCount: values.length,
-      itemBuilder: (BuildContext context, int index) {
-        return new Column(
-          children: <Widget>[
-            new ListTile(
-              title: new Text(values[index].toString()),
-            ),
-            new Divider(
-              height: 2.0,
-            ),
-          ],
-        );
-      },
-    );
+    if(values.isNotEmpty) {
+      return new ListView.builder(
+        itemCount: values.length,
+        itemBuilder: (BuildContext context, int index) {
+          return new Column(
+            children: <Widget>[
+              new ListTile(
+                title: new Text(values[index].toString()),
+              ),
+              new Divider(
+                height: 2.0,
+              ),
+            ],
+          );
+        },
+      );
+    } else {
+      return Center(
+        child: Text("No media added yet, Please add few using + sign"),
+      );
+    }
   }
 }
