@@ -31,6 +31,9 @@ class MyHomePage extends StatefulWidget {
 class _MyHomePageState extends State<MyHomePage> {
   List<dynamic> videosPath = List();
 
+//  static const platform = const MethodChannel('samples.flutter.io/battery');
+
+
   @override
   void initState() {
     super.initState();
@@ -38,7 +41,6 @@ class _MyHomePageState extends State<MyHomePage> {
 
   @override
   Widget build(BuildContext context) {
-
     Widget child = new Scaffold(
       appBar: new AppBar(
         title: new Text('Movie Maker'),
@@ -62,6 +64,7 @@ class _MyHomePageState extends State<MyHomePage> {
       videosPath.addAll(results);
     });
   }
+
   Future<List<dynamic>> pickVideos() async {
     List<dynamic> paths;
     try {
@@ -85,25 +88,45 @@ class _MyHomePageState extends State<MyHomePage> {
 
   Widget _buildContentSection() {
     if (videosPath.isNotEmpty) {
-      return new ListView.builder(
-        itemCount: videosPath.length,
-        itemBuilder: (BuildContext context, int index) {
-          return new Column(
-            children: <Widget>[
-              new ListTile(
-                title: new Text(videosPath[index].toString()),
-              ),
-              new Divider(
-                height: 2.0,
-              ),
-            ],
-          );
-        },
+      List<Widget> itemWidgets =
+          videosPath.map((path) => _buildItemWidget(path.toString())).toList();
+      return new CustomScrollView(
+        primary: false,
+        slivers: <Widget>[
+          new SliverPadding(
+            padding: const EdgeInsets.all(20.0),
+            sliver: new SliverGrid.count(
+              crossAxisSpacing: 10.0,
+              crossAxisCount: 2,
+              children: itemWidgets,
+            ),
+          ),
+        ],
       );
     } else {
       return Center(
         child: Text("No media added yet, Please add few using + sign"),
       );
     }
+  }
+
+  Widget _buildItemWidget(String imagePath) {
+    return Stack(
+      children: <Widget>[
+        new FadeInImage(
+          image: new FileImage(File(imagePath)),
+          fit: BoxFit.fill,
+          width: 100.0,
+          height: 150.0,
+          placeholder: AssetImage("assets/ic_placeholder_80px.png"),
+        ),
+        Align(
+          child: new Text(
+            imagePath,
+          ),
+          alignment: AlignmentDirectional.bottomStart,
+        )
+      ],
+    );
   }
 }
