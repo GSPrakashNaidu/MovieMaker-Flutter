@@ -6,6 +6,9 @@ import 'package:flutter/material.dart';
 import 'package:medias_picker/medias_picker.dart';
 import 'package:flutter/services.dart';
 import 'package:video_player/video_player.dart';
+import 'dart:typed_data';
+import 'cache.dart';
+import 'package:cached_network_image/cached_network_image.dart';
 
 void main() => runApp(new MyApp());
 
@@ -30,13 +33,19 @@ class MyHomePage extends StatefulWidget {
 
 class _MyHomePageState extends State<MyHomePage> {
   List<dynamic> videosPath = List();
+  Cache<Uint8List> cache = MemCache();
 
-//  static const platform = const MethodChannel('samples.flutter.io/battery');
+  static const MethodChannel methodChannel =
+      const MethodChannel('moviemaker.devunion.com/battery');
+  static const MethodChannel videoThumbnailChannel =
+      const MethodChannel('moviemaker.devunion.com/videoThumbnail');
 
+  String _batteryLevel = 'Battery level: unknown.';
 
   @override
   void initState() {
     super.initState();
+    _getBatteryLevel();
   }
 
   @override
@@ -45,13 +54,24 @@ class _MyHomePageState extends State<MyHomePage> {
       appBar: new AppBar(
         title: new Text('Movie Maker'),
       ),
-      body: _buildContentSection(),
+      body: Column(
+        children: <Widget>[
+          Flexible(
+            child: _buildBatteryLevelSection(),
+            flex: 0,
+          ),
+          Flexible(
+            child: _buildContentSection(),
+            flex: 1,
+          ),
+        ],
+      ),
       floatingActionButton: new FloatingActionButton(
         onPressed: () {
           debugPrint("Bipin - FAB pressed");
           pickVideos().asStream().listen(_setResults);
         },
-        tooltip: 'Pick a Video',
+        tooltip: "Pick a Video",
         child: new Icon(Icons.add),
       ),
     );
@@ -88,15 +108,18 @@ class _MyHomePageState extends State<MyHomePage> {
 
   Widget _buildContentSection() {
     if (videosPath.isNotEmpty) {
-      List<Widget> itemWidgets =
-          videosPath.map((path) => _buildItemWidget(path.toString())).toList();
+      List<Widget> itemWidgets = videosPath
+          .map((path) => _buildVideoThumbnailView(path.toString()))
+          .toList();
       return new CustomScrollView(
         primary: false,
         slivers: <Widget>[
           new SliverPadding(
             padding: const EdgeInsets.all(20.0),
             sliver: new SliverGrid.count(
-              crossAxisSpacing: 10.0,
+              crossAxisSpacing: 5.0,
+              mainAxisSpacing: 5.0,
+              childAspectRatio: 3 / 2,
               crossAxisCount: 2,
               children: itemWidgets,
             ),
@@ -110,23 +133,64 @@ class _MyHomePageState extends State<MyHomePage> {
     }
   }
 
-  Widget _buildItemWidget(String imagePath) {
-    return Stack(
-      children: <Widget>[
-        new FadeInImage(
-          image: new FileImage(File(imagePath)),
-          fit: BoxFit.fill,
-          width: 100.0,
-          height: 150.0,
-          placeholder: AssetImage("assets/ic_placeholder_80px.png"),
+  Future<Uint8List> _getVideoThumnail(String path) async {
+    Uint8List imageBytes;
+    try {
+      imageBytes = await methodChannel
+          .invokeMethod('getVideoThumbnail', {"videoPath": path});
+    } on PlatformException {}
+    return imageBytes;
+  }
+
+  Widget _buildInlineVideo(Uint8List data) {
+    return Container(
+      color: Colors.blue,
+      child: new FadeInImage(
+        fit: BoxFit.fill,
+        placeholder: AssetImage("assets/ic_placeholder_80px.png"),
+        image: MemoryImage(data, scale: 1.0),
+      ),
+    );
+  }
+
+  FutureBuilder<Uint8List> _buildVideoThumbnailView(String path) {
+    return new FutureBuilder<Uint8List>(
+        future: _getVideoThumnail(path), // a Future<String> or null
+        builder: (BuildContext context, AsyncSnapshot<Uint8List> snapshot) {
+          switch (snapshot.connectionState) {
+            case ConnectionState.done:
+              return _buildInlineVideo(snapshot.data);
+            case ConnectionState.waiting:
+            case ConnectionState.active:
+            case ConnectionState.none:
+            default:
+            return Image.asset("assets/ic_placeholder_80px.png");
+          }
+        });
+  }
+
+  Future<Null> _getBatteryLevel() async {
+    String batteryLevel;
+    try {
+      final int result = await methodChannel.invokeMethod('getBatteryLevel');
+      batteryLevel = 'Battery level: $result%.';
+    } on PlatformException {
+      batteryLevel = 'Failed to get battery level.';
+    }
+    setState(() {
+      _batteryLevel = batteryLevel;
+    });
+  }
+
+  Widget _buildBatteryLevelSection() {
+    return Container(
+      color: Colors.blueGrey,
+      child: Padding(
+        padding: EdgeInsets.all(10.0),
+        child: Center(
+          child: Text(_batteryLevel),
         ),
-        Align(
-          child: new Text(
-            imagePath,
-          ),
-          alignment: AlignmentDirectional.bottomStart,
-        )
-      ],
+      ),
     );
   }
 }
