@@ -136,8 +136,12 @@ class _MyHomePageState extends State<MyHomePage> {
   Future<Uint8List> _getVideoThumnail(String path) async {
     Uint8List imageBytes;
     try {
-      imageBytes = await methodChannel
-          .invokeMethod('getVideoThumbnail', {"videoPath": path});
+      imageBytes = await cache.get(path.hashCode);
+      if (imageBytes == null) {
+        imageBytes = await methodChannel
+            .invokeMethod('getVideoThumbnail', {"videoPath": path});
+        cache.put(path.hashCode, imageBytes);
+      }
     } on PlatformException {}
     return imageBytes;
   }
@@ -164,7 +168,7 @@ class _MyHomePageState extends State<MyHomePage> {
             case ConnectionState.active:
             case ConnectionState.none:
             default:
-            return Image.asset("assets/ic_placeholder_80px.png");
+              return Image.asset("assets/ic_placeholder_80px.png");
           }
         });
   }
