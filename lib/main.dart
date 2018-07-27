@@ -53,6 +53,16 @@ class _MyHomePageState extends State<MyHomePage> {
     Widget child = new Scaffold(
       appBar: new AppBar(
         title: new Text('Movie Maker'),
+        actions: <Widget>[
+          // action button
+          IconButton(
+            icon: Icon(Icons.movie_creation),
+            onPressed: () {
+              _createMovie(videosPath)
+                  .then((moviePath) => _startMovie(moviePath));
+            },
+          )
+        ],
       ),
       body: Column(
         children: <Widget>[
@@ -196,5 +206,27 @@ class _MyHomePageState extends State<MyHomePage> {
         ),
       ),
     );
+  }
+
+  Future<String> _createMovie(List<dynamic> paths) async {
+    var videoPaths = List<String>();
+    for (var i = 0; i < paths.length; i++) {
+      videoPaths.add(paths[i]);
+    }
+    String moviePath;
+    try {
+      moviePath = await methodChannel
+          .invokeMethod('createMovie', {"videoPaths": paths});
+      debugPrint("Bipin - Movie created path: $moviePath");
+    } on PlatformException {}
+
+    return moviePath;
+  }
+
+  Future<Null> _startMovie(String moviePath) async {
+    try {
+      await methodChannel.invokeMethod('startMovie', {"moviePath": moviePath});
+      debugPrint("Bipin - Movie started");
+    } on PlatformException {}
   }
 }
