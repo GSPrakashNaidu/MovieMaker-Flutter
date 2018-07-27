@@ -15,6 +15,7 @@ import android.os.Bundle
 import android.provider.MediaStore
 import android.util.Log
 import com.devunion.moviemaker.util.VideoJoiner
+import com.devunion.moviemaker.util.showMovie
 import io.flutter.app.FlutterActivity
 import io.flutter.plugin.common.MethodChannel
 import io.flutter.plugins.GeneratedPluginRegistrant
@@ -53,7 +54,8 @@ class MainActivity : FlutterActivity() {
             requestPermissions(PERMISSIONS, 1)
         }
 
-        MethodChannel(flutterView, BATTERY_CHANNEL).setMethodCallHandler { call, result ->
+        MethodChannel(flutterView, MOVIE_MAKER_CHANNEL).setMethodCallHandler { call, result ->
+            Log.d("MainActivity", "Bipin - method: ${call.method}")
             if (call.method == "getBatteryLevel") {
                 val batteryLevel = batteryLevel
 
@@ -82,6 +84,15 @@ class MainActivity : FlutterActivity() {
                 } else {
                     result.error("UNAVAILABLE", "Movie creation failed.", null)
                 }
+            } else if (call.method == "startMovie") {
+                val moviePath = call.argument<String>("moviePath")
+                Log.d("MainActivity", "Bipin - moviePath: $moviePath")
+                try {
+                    showMovie(moviePath)
+                    result.success(true)
+                } catch (e: Exception) {
+                    result.error("UNAVAILABLE", "Movie creation failed.", e)
+                }
             } else {
                 result.notImplemented()
             }
@@ -106,8 +117,7 @@ class MainActivity : FlutterActivity() {
             Manifest.permission.WRITE_EXTERNAL_STORAGE,
             Manifest.permission.READ_EXTERNAL_STORAGE
         )
-        private val BATTERY_CHANNEL = "moviemaker.devunion.com/battery"
-        private val VIDEO_THUMBNAIL = "moviemaker.devunion.com/videoThumbnail"
+        private val MOVIE_MAKER_CHANNEL = "moviemaker.devunion.com/movie_maker_channel"
 
     }
 }

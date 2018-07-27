@@ -36,9 +36,7 @@ class _MyHomePageState extends State<MyHomePage> {
   Cache<Uint8List> cache = MemCache();
 
   static const MethodChannel methodChannel =
-      const MethodChannel('moviemaker.devunion.com/battery');
-  static const MethodChannel videoThumbnailChannel =
-      const MethodChannel('moviemaker.devunion.com/videoThumbnail');
+      const MethodChannel('moviemaker.devunion.com/movie_maker_channel');
 
   String _batteryLevel = 'Battery level: unknown.';
 
@@ -224,9 +222,11 @@ class _MyHomePageState extends State<MyHomePage> {
   }
 
   Future<Null> _startMovie(String moviePath) async {
+    debugPrint("Bipin - Created Movie path: $moviePath");
     try {
-      await methodChannel.invokeMethod('startMovie', {"moviePath": moviePath});
-      debugPrint("Bipin - Movie started");
+      var started = await methodChannel
+          .invokeMethod('startMovie', {"moviePath": moviePath});
+      debugPrint("Bipin - is Movie started: $started");
     } on PlatformException {}
   }
 }
