@@ -1,11 +1,19 @@
 buildscript {
+    ext.kotlin_version = '1.2.41'
     repositories {
         google()
         jcenter()
+        mavenCentral()
+        maven {
+            url 'https://maven.google.com'
+            name 'Google'
+        }
+        maven { url 'https://oss.sonatype.org/content/repositories/releases/' }
     }
 
     dependencies {
         classpath 'com.android.tools.build:gradle:3.0.1'
+        classpath "org.jetbrains.kotlin:kotlin-gradle-plugin:$kotlin_version"
     }
 }
 
@@ -13,6 +21,13 @@ allprojects {
     repositories {
         google()
         jcenter()
+        mavenCentral()
+        maven {
+            url 'https://maven.google.com/'
+            name 'Google'
+        }
+        maven { url 'https://oss.sonatype.org/content/repositories/releases/' }
+
     }
 }
 
@@ -22,6 +37,15 @@ subprojects {
 }
 subprojects {
     project.evaluationDependsOn(':app')
+// com.android.support:appcompat-v7 dependency issue fix
+    project.configurations.all {
+        resolutionStrategy.eachDependency { details ->
+            if (details.requested.group == 'com.android.support'
+                    && !details.requested.name.contains('multidex')) {
+                details.useVersion "27.1.1"
+            }
+        }
+    }
 }
 
 task clean(type: Delete) {
