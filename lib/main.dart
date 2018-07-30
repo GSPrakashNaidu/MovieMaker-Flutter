@@ -5,10 +5,8 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:medias_picker/medias_picker.dart';
 import 'package:flutter/services.dart';
-import 'package:video_player/video_player.dart';
 import 'dart:typed_data';
 import 'cache.dart';
-import 'package:cached_network_image/cached_network_image.dart';
 
 void main() => runApp(new MyApp());
 
