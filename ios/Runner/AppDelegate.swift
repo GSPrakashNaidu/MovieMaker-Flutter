@@ -1,5 +1,6 @@
 import UIKit
 import Flutter
+import AVFoundation
 
 @UIApplicationMain
 @objc class AppDelegate: FlutterAppDelegate {
@@ -16,6 +17,10 @@ import Flutter
         (call: FlutterMethodCall, result: FlutterResult) -> Void in
         if ("getBatteryLevel" == call.method) {
             self.receiveBatteryLevel(result: result);
+        } else if("getVideoThumbnail" == call.method) {
+            let videoPath = call.arguments("videoPath");
+            let bytes = getVideoThumbnail(videoPath)
+            
         } else {
             result(FlutterMethodNotImplemented);
         }
@@ -39,5 +44,19 @@ import Flutter
         }
     }
     
+    private func getVideoThumbnail(videoPath: String,result: FlutterResult) {
+        
+         do {
+        var err: NSError? = nil
+        let asset = AVURLAsset(URL: NSURL(fileURLWithPath: videoPath), options: nil)
+        let imgGenerator = AVAssetImageGenerator(asset: asset)
+        let cgImage = imgGenerator.copyCGImageAtTime(CMTimeMake(0, 1), actualTime: nil, error: &err)
+        // !! check the error before proceeding
+        let uiImage = UIImage(CGImage: cgImage)
+         }catch let error {
+            
+        }
+        
+    }
     
 }
