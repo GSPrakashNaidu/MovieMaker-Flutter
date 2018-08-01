@@ -41,7 +41,7 @@ class _MyHomePageState extends State<MyHomePage> {
   @override
   void initState() {
     super.initState();
-    _getBatteryLevel();
+//    _getBatteryLevel();
   }
 
   @override
@@ -60,18 +60,7 @@ class _MyHomePageState extends State<MyHomePage> {
           )
         ],
       ),
-      body: Column(
-        children: <Widget>[
-          Flexible(
-            child: _buildBatteryLevelSection(),
-            flex: 0,
-          ),
-          Flexible(
-            child: _buildContentSection(),
-            flex: 1,
-          ),
-        ],
-      ),
+      body: _buildContentSection(),
       floatingActionButton: new FloatingActionButton(
         onPressed: () {
           debugPrint("Bipin - FAB pressed");
