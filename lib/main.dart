@@ -62,10 +62,10 @@ class _MyHomePageState extends State<MyHomePage> {
       ),
       body: Column(
         children: <Widget>[
-          Flexible(
-            child: _buildBatteryLevelSection(),
-            flex: 0,
-          ),
+//          Flexible(
+//            child: _buildBatteryLevelSection(),
+//            flex: 0,
+//          ),
           Flexible(
             child: _buildContentSection(),
             flex: 1,
