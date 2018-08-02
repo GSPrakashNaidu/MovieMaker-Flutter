@@ -41,7 +41,7 @@ class _MyHomePageState extends State<MyHomePage> {
   @override
   void initState() {
     super.initState();
-    _getBatteryLevel();
+//    _getBatteryLevel();
   }
 
   @override
@@ -60,18 +60,7 @@ class _MyHomePageState extends State<MyHomePage> {
           )
         ],
       ),
-      body: Column(
-        children: <Widget>[
-//          Flexible(
-//            child: _buildBatteryLevelSection(),
-//            flex: 0,
-//          ),
-          Flexible(
-            child: _buildContentSection(),
-            flex: 1,
-          ),
-        ],
-      ),
+      body: _buildContentSection(),
       floatingActionButton: new FloatingActionButton(
         onPressed: () {
           debugPrint("Bipin - FAB pressed");
@@ -205,10 +194,10 @@ class _MyHomePageState extends State<MyHomePage> {
   }
 
   Future<String> _createMovie(List<dynamic> paths) async {
-    var videoPaths = List<String>();
-    for (var i = 0; i < paths.length; i++) {
-      videoPaths.add(paths[i]);
-    }
+//    var videoPaths = List<String>();
+//    for (var i = 0; i < paths.length; i++) {
+//      videoPaths.add(paths[i]);
+//    }
     String moviePath;
     try {
       moviePath = await methodChannel
