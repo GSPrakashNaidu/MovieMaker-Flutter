@@ -7,6 +7,7 @@ import 'package:medias_picker/medias_picker.dart';
 import 'package:flutter/services.dart';
 import 'dart:typed_data';
 import 'cache.dart';
+import 'video_detail.dart';
 
 void main() => runApp(new MyApp());
 
@@ -30,8 +31,7 @@ class MyHomePage extends StatefulWidget {
 }
 
 class _MyHomePageState extends State<MyHomePage> {
-  List<dynamic> videosPath = List();
-  Cache<Uint8List> cache = MemCache();
+  static List<dynamic> videosPath = List();
 
   static const MethodChannel methodChannel =
       const MethodChannel('moviemaker.devunion.com/movie_maker_channel');
@@ -131,23 +131,30 @@ class _MyHomePageState extends State<MyHomePage> {
   Future<Uint8List> _getVideoThumnail(String path) async {
     Uint8List imageBytes;
     try {
-      imageBytes = await cache.get(path.hashCode);
+      imageBytes = await globalCache.get(path.hashCode);
       if (imageBytes == null) {
         imageBytes = await methodChannel
             .invokeMethod('getVideoThumbnail', {"videoPath": path});
-        cache.put(path.hashCode, imageBytes);
+        globalCache.put(path.hashCode, imageBytes);
       }
     } on PlatformException {}
     return imageBytes;
   }
 
-  Widget _buildInlineVideo(Uint8List data) {
-    return Container(
-      color: Colors.blue,
-      child: new FadeInImage(
-        fit: BoxFit.fill,
-        placeholder: AssetImage("assets/ic_placeholder_80px.png"),
-        image: MemoryImage(data, scale: 1.0),
+  Widget _buildInlineVideo(String videoPath, Uint8List data) {
+    return GridTile(
+      child: InkResponse(
+        child: new FadeInImage(
+          fit: BoxFit.fill,
+          placeholder: AssetImage("assets/ic_placeholder_80px.png"),
+          image: MemoryImage(data, scale: 1.0),
+        ),
+        onTap: () {
+          Navigator.push(
+            context,
+            MaterialPageRoute(builder: (context) => VideoDetail(videoPath: videoPath)),
+          );
+        },
       ),
     );
   }
@@ -158,7 +165,7 @@ class _MyHomePageState extends State<MyHomePage> {
         builder: (BuildContext context, AsyncSnapshot<Uint8List> snapshot) {
           switch (snapshot.connectionState) {
             case ConnectionState.done:
-              return _buildInlineVideo(snapshot.data);
+              return _buildInlineVideo(path, snapshot.data);
             case ConnectionState.waiting:
             case ConnectionState.active:
             case ConnectionState.none:
