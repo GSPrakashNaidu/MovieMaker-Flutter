@@ -194,10 +194,10 @@ class _MyHomePageState extends State<MyHomePage> {
   }
 
   Future<String> _createMovie(List<dynamic> paths) async {
-    var videoPaths = List<String>();
-    for (var i = 0; i < paths.length; i++) {
-      videoPaths.add(paths[i]);
-    }
+//    var videoPaths = List<String>();
+//    for (var i = 0; i < paths.length; i++) {
+//      videoPaths.add(paths[i]);
+//    }
     String moviePath;
     try {
       moviePath = await methodChannel

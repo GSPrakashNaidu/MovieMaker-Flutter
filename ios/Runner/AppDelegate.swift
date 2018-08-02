@@ -10,8 +10,8 @@ import AVKit
         didFinishLaunchingWithOptions launchOptions: [UIApplicationLaunchOptionsKey: Any]?
         ) -> Bool {
         GeneratedPluginRegistrant.register(with: self)
-        
         let controller : FlutterViewController = window?.rootViewController as! FlutterViewController;
+
         let flutterMethodChannel = FlutterMethodChannel.init(name: "moviemaker.devunion.com/movie_maker_channel", binaryMessenger: controller);
         flutterMethodChannel.setMethodCallHandler({
             (call: FlutterMethodCall, result: FlutterResult) -> Void in
