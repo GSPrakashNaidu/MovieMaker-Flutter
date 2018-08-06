@@ -1,8 +1,5 @@
 import 'dart:async';
 import 'dart:collection';
-import 'dart:typed_data';
-
-final Cache<Uint8List> globalCache = MemCache();
 
 abstract class Cache<T> {
     Future<T> get(int key);
