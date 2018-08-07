@@ -3,9 +3,8 @@ import 'dart:io';
 
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter/services.dart';
 import 'dart:typed_data';
-import 'cache.dart';
+import 'globals.dart' as globals;
 
 class VideoDetail extends StatelessWidget {
   final String videoPath;
@@ -42,7 +41,7 @@ class VideoDetail extends StatelessWidget {
   }
 
   Future<Uint8List> _getVideoThumnail(String path) async {
-    return await globalCache.get(path.hashCode);
+    return await globals.cache.get(path.hashCode);
   }
 
   Widget _buildInlineVideo(Uint8List data) {
