@@ -8,7 +8,8 @@ import 'package:flutter/services.dart';
 import 'dart:typed_data';
 import 'globals.dart' as globals;
 import 'video_detail.dart';
-import 'package:progress_hud/progress_hud.dart';
+//import 'package:progress_hud/progress_hud.dart';
+import 'package:modal_progress_hud/modal_progress_hud.dart';
 
 void main() => runApp(new MyApp());
 
@@ -38,7 +39,7 @@ class _MyHomePageState extends State<MyHomePage> {
       const MethodChannel('moviemaker.devunion.com/movie_maker_channel');
 
   String _batteryLevel = 'Battery level: unknown.';
-  ProgressHUD _progressHUD;
+//  ProgressHUD _progressHUD;
   bool _loading = false;
 
   @override
@@ -46,14 +47,14 @@ class _MyHomePageState extends State<MyHomePage> {
     super.initState();
 //    _getBatteryLevel();
 
-    _progressHUD = new ProgressHUD(
-      backgroundColor: Colors.black12,
-      color: Colors.white,
-      containerColor: Colors.blue,
-      borderRadius: 5.0,
-      text: 'Loading...',
-      loading: false,
-    );
+//    _progressHUD = new ProgressHUD(
+//      backgroundColor: Colors.black12,
+//      color: Colors.white,
+//      containerColor: Colors.blue,
+//      borderRadius: 5.0,
+//      text: 'Loading...',
+//      loading: false,
+//    );
   }
 
   @override
@@ -71,7 +72,7 @@ class _MyHomePageState extends State<MyHomePage> {
           )
         ],
       ),
-      body: Stack(children: [_progressHUD, _buildContentSection()]),
+      body: ModalProgressHUD(child: _buildContentSection(), inAsyncCall: _loading),
       floatingActionButton: new FloatingActionButton(
         onPressed: () {
           debugPrint("Bipin - FAB pressed");
@@ -86,12 +87,15 @@ class _MyHomePageState extends State<MyHomePage> {
   }
 
   void toggleProgressHUD() {
+//    setState(() {
+//      if (_loading) {
+//        _progressHUD.state.dismiss();
+//      } else {
+//        _progressHUD.state.show();
+//      }
+//      _loading = !_loading;
+//    });
     setState(() {
-      if (_loading) {
-        _progressHUD.state.dismiss();
-      } else {
-        _progressHUD.state.show();
-      }
       _loading = !_loading;
     });
   }
