@@ -67,15 +67,17 @@ class _MyHomePageState extends State<MyHomePage> {
           IconButton(
             icon: Icon(Icons.movie_creation),
             onPressed: () {
-              _createMovieSync(videosPath);
+              _createMovie(videosPath)
+                  .then((moviePath) => _startMovie(moviePath));
             },
           )
         ],
       ),
-      body: ModalProgressHUD(child: _buildContentSection(), inAsyncCall: _loading),
+      // body: ModalProgressHUD(child: _buildContentSection(), inAsyncCall: _loading),
+      body: _buildContentSection(),
       floatingActionButton: new FloatingActionButton(
         onPressed: () {
-          debugPrint("Bipin - FAB pressed");
+          debugPrint( "FAB pressed");
           pickVideos().asStream().listen(_setResults);
         },
         tooltip: "Pick a Video",
@@ -117,9 +119,9 @@ class _MyHomePageState extends State<MyHomePage> {
         }
       }
       paths = await MediasPicker.pickVideos(quantity: 10);
-      debugPrint("Bipin - selected videos paths: $paths");
+      debugPrint( "selected videos paths: $paths");
     } on PlatformException {
-      debugPrint("Bipin - PlatformExcetion while picking videos");
+      debugPrint( "PlatformExcetion while picking videos");
     }
 
     if (!mounted) return List();
@@ -136,7 +138,7 @@ class _MyHomePageState extends State<MyHomePage> {
         primary: false,
         slivers: <Widget>[
           new SliverPadding(
-            padding: const EdgeInsets.all(20.0),
+            padding: const EdgeInsets.all(5.0),
             sliver: new SliverGrid.count(
               crossAxisSpacing: 5.0,
               mainAxisSpacing: 5.0,
@@ -154,12 +156,12 @@ class _MyHomePageState extends State<MyHomePage> {
     }
   }
 
-  Future<Uint8List> _getVideoThumnail(String path) async {
+  Future<Uint8List> _getVideoThumbnail(String path) async {
     Uint8List imageBytes;
     try {
       imageBytes = await globals.cache.get(path.hashCode);
       if (imageBytes == null) {
-        debugPrint("Bipin - fetching thumbnail using methodChannel");
+        debugPrint( "fetching thumbnail using methodChannel");
         imageBytes = await methodChannel
             .invokeMethod('getVideoThumbnail', {"videoPath": path});
         globals.cache.put(path.hashCode, imageBytes);
@@ -189,9 +191,9 @@ class _MyHomePageState extends State<MyHomePage> {
 
   FutureBuilder<Uint8List> _buildVideoThumbnailView(String path) {
     return new FutureBuilder<Uint8List>(
-        future: _getVideoThumnail(path), // a Future<String> or null
+        future: _getVideoThumbnail(path), // a Future<String> or null
         builder: (BuildContext context, AsyncSnapshot<Uint8List> snapshot) {
-          debugPrint("Bipin - Snapshot state: ${snapshot.connectionState}");
+          debugPrint("Snapshot state: ${snapshot.connectionState}");
           switch (snapshot.connectionState) {
             case ConnectionState.done:
               return _buildInlineVideo(path, snapshot.data);
@@ -234,42 +236,42 @@ class _MyHomePageState extends State<MyHomePage> {
     );
   }
 
-  void _createMovieSync(List<dynamic> paths) {
-    toggleProgressHUD();
-    _createMovie(videosPath).then((moviePath) {
-      debugPrint("Bipin - _createMovieSync Movie created path: $moviePath");
-      _startMovie(moviePath).then((_) {
-        debugPrint("Bipin - start movie then");
-      }).catchError((error) {
-        debugPrint("Bipin - start movie error:");
-      }).whenComplete(() {
-        debugPrint("Bipin - start movie completed.");
-        toggleProgressHUD();
-      });
-    }).catchError((error) {
-      debugPrint("Bipin - Create movie error: ${error.toString()}");
-    }).whenComplete(() {
-      debugPrint("Bipin - Create movie completed.");
-    });
-  }
+//  void _createMovieSync(List<dynamic> paths) {
+//    toggleProgressHUD();
+//    _createMovie(videosPath).then((moviePath) {
+//      debugPrint( "_createMovieSync Movie created path: $moviePath");
+//      _startMovie(moviePath).then((_) {
+//        debugPrint( "start movie then");
+//      }).catchError((error) {
+//        debugPrint( "start movie error:");
+//      }).whenComplete(() {
+//        debugPrint( "start movie completed.");
+//        toggleProgressHUD();
+//      });
+//    }).catchError((error) {
+//      debugPrint( "Create movie error: ${error.toString()}");
+//    }).whenComplete(() {
+//      debugPrint( "Create movie completed.");
+//    });
+//  }
 
-  Future<String> _createMovie(List<dynamic> paths) {
-    return Future<String>(() {
-      debugPrint("Bipin - Create movie future going to sleep");
-      sleep(Duration(seconds: 10));
-      debugPrint("Bipin - Create movie future wake up");
-      return "FilePath goes here";
-    });
-//    return methodChannel.invokeMethod('createMovie', {"videoPaths": paths});
+  Future<String> _createMovie(List<dynamic> paths) async {
+    String moviePath;
+    try {
+      moviePath = await methodChannel
+          .invokeMethod('createMovie', {"videoPaths": paths});
+      debugPrint("Movie created path: $moviePath");
+    } on PlatformException {}
+
+    return moviePath;
   }
 
   Future<Null> _startMovie(String moviePath) async {
-    return Future<Null>(() {
-      debugPrint("Bipin - Start movie future going to sleep");
-      sleep(Duration(seconds: 10));
-      debugPrint("Bipin - Start movie future wake up");
-    });
-//    debugPrint("Bipin - Created Movie path: $moviePath");
-//    return methodChannel.invokeMethod('startMovie', {"moviePath": moviePath});
+    debugPrint("Created Movie path: $moviePath");
+    try {
+      var started = await methodChannel
+          .invokeMethod('startMovie', {"moviePath": moviePath});
+      debugPrint("is Movie started: $started");
+    } on PlatformException {}
   }
 }
