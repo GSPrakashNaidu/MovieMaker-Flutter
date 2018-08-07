@@ -1,10 +1,9 @@
 import 'dart:async';
-import 'dart:io';
-
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'dart:typed_data';
-import 'globals.dart' as globals;
+
+import 'package:movie_maker/app/globals.dart' as globals;
 
 class VideoDetail extends StatelessWidget {
   final String videoPath;
