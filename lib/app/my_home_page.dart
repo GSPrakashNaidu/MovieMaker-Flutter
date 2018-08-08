@@ -68,9 +68,9 @@ class _MyHomePageState extends State<MyHomePage> {
         }
       }
       List<dynamic> selectedPaths = await MediasPicker.pickVideos(quantity: 10);
-      selectedPaths.map((videoPath) => paths.add(videoPath));
+      paths = List.from(selectedPaths);
 
-      debugPrint("selected videos paths: $paths");
+      debugPrint("Bipin - selected videos paths: $paths");
     } on PlatformException {
       debugPrint("PlatformExcetion while picking videos");
     }
